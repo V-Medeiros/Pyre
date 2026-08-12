@@ -15,7 +15,7 @@ export function applyTheme(theme: Theme) {
   try {
     localStorage.setItem('theme', theme);
   } catch {
-    // O tema ainda é aplicado quando a persistência está indisponível.
+    //ahm...eeeeh
   }
 }
 
