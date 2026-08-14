@@ -6,9 +6,9 @@ through a streak ritual.
 
 ## Current status
 
-The Pomodoro mode is the completed MVP flow. `Stopwatch` and `Timer` are
-available in the navigation but intentionally show a minimal **Page in
-progress** view until their dedicated experiences are implemented.
+The Pomodoro and `Stopwatch` modes are complete. `Timer` is available in the
+navigation but intentionally shows a minimal **Page in progress** view until
+its dedicated experience is implemented.
 
 The interface is currently in English. No account, backend, or network
 connection is required.
@@ -23,6 +23,13 @@ connection is required.
 - Recovery of an active session after a page reload.
 - Completed and abandoned session history.
 - Optional link between the active session and a task.
+
+### Stopwatch
+
+- Start, pause, resume, and reset controls.
+- Centisecond readout based on wall-clock time for background-tab accuracy.
+- Lap splits with individual and total elapsed times.
+- Recovery of the running stopwatch and its laps after a page reload.
 
 ### Tasks
 
@@ -56,6 +63,7 @@ All data stays in browser `localStorage`:
 | `vesta_streak` | Daily streak progress |
 | `vesta_settings` | Experience settings |
 | `vesta_active_session` | Session currently in progress |
+| `vesta_stopwatch` | Stopwatch time, status, and laps |
 | `theme` | Selected visual theme |
 
 ## Technology

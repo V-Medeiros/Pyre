@@ -3,11 +3,10 @@ import type { AppMode } from '../../Models/AppMode';
 import styles from './style.module.css';
 
 type ModePlaceholderProps = {
-  mode: Exclude<AppMode, 'pomodoro'>;
+  mode: Extract<AppMode, 'timer'>;
 };
 
 const MODE_LABELS = {
-  stopwatch: 'Stopwatch',
   timer: 'Timer',
 } as const;
 

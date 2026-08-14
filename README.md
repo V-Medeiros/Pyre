@@ -217,7 +217,7 @@ Uma stack futura possivel:
 
 ## Status
 
-O modo Pomodoro do MVP esta funcional no frontend React: timer, tarefas,
-streak, fogueira de 14 dias, configuracoes e persistencia local funcionam sem
-conta ou backend. As abas Stopwatch e Timer ja fazem parte da navegacao e
-exibem uma pagina minima de progresso enquanto esses modos sao desenvolvidos.
+Os modos Pomodoro e Stopwatch estao funcionais no frontend React. Pomodoro
+inclui tarefas, streak, fogueira de 14 dias e configuracoes; Stopwatch inclui
+pausa, retomada, voltas e persistencia local. A aba Timer continua exibindo uma
+pagina minima de progresso enquanto seu modo dedicado e desenvolvido.

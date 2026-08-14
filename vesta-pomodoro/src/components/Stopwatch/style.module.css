@@ -1,0 +1,149 @@
+.stopwatch {
+  width: min(100%, 650px);
+  display: grid;
+  justify-items: center;
+  gap: 44px;
+}
+
+.readout {
+  width: 100%;
+  min-height: 260px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
+  padding: 36px 18px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.eyebrow,
+.status {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  letter-spacing: 0.18em;
+}
+
+.status {
+  min-width: 74px;
+  padding: 5px 9px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  letter-spacing: 0.08em;
+}
+
+.time {
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  font-size: clamp(2.15rem, 7vw, 4.75rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.controls {
+  width: min(100%, 590px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.controls > :only-child {
+  grid-column: 1 / -1;
+}
+
+.laps {
+  width: min(100%, 590px);
+  text-align: left;
+}
+
+.lapsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.lapsHeader h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.lapsHeader span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.lapList {
+  max-height: 210px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.lapList li {
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 8px 4px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lapList li strong {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.lapList li span:last-child {
+  text-align: right;
+}
+
+@media (max-width: 520px) {
+  .stopwatch {
+    gap: 28px;
+  }
+
+  .readout {
+    min-height: 220px;
+    padding-inline: 8px;
+  }
+
+  .time {
+    font-size: clamp(1.85rem, 10vw, 3rem);
+  }
+
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .controls > :only-child {
+    grid-column: auto;
+  }
+
+  .lapList li {
+    gap: 8px;
+    font-size: 0.76rem;
+  }
+
+  .lapList li strong {
+    font-size: 0.83rem;
+  }
+}

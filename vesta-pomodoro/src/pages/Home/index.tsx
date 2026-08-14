@@ -5,6 +5,7 @@ import { HistoryPanel } from '../../components/HistoryPanel';
 import { MainForm } from '../../components/MainForm';
 import { ModePlaceholder } from '../../components/ModePlaceholder';
 import { SettingsPanel } from '../../components/SettingsPanel';
+import { Stopwatch } from '../../components/Stopwatch';
 import { TaskPanel } from '../../components/TaskPanel';
 import { useTaskContext } from '../../context/TaskContext/UseTaskContext';
 import type { AppMode } from '../../Models/AppMode';
@@ -92,10 +93,10 @@ export function Home() {
             </div>
           </section>
         </div>
+      ) : activeMode === 'stopwatch' ? (
+        <Stopwatch />
       ) : (
-        <ModePlaceholder
-          mode={activeMode}
-        />
+        <ModePlaceholder mode='timer' />
       )}
       {isHistoryOpen && <HistoryPanel onClose={closeHistory} />}
       {isSettingsOpen && <SettingsPanel onClose={closeSettings} />}

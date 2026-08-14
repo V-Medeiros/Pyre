@@ -5,6 +5,7 @@ import type {
   StreakModel,
 } from '../Models/TaskStateModel';
 import type { TaskModel } from '../Models/TaskModel';
+import type { StopwatchModel } from '../Models/StopwatchModel';
 
 export const STORAGE_KEYS = {
   tasks: 'vesta_tasks',
@@ -12,6 +13,7 @@ export const STORAGE_KEYS = {
   streak: 'vesta_streak',
   settings: 'vesta_settings',
   activeSession: 'vesta_active_session',
+  stopwatch: 'vesta_stopwatch',
 } as const;
 
 function readStorage(key: string): unknown {
@@ -140,6 +142,36 @@ export function loadActiveSession(): ActiveSessionModel | null {
     startedAt: session.startedAt,
     endsAt: session.endsAt,
     pausedSecondsRemaining,
+  };
+}
+
+export function loadStopwatch(): StopwatchModel | null {
+  const stopwatch = readStorage(STORAGE_KEYS.stopwatch);
+
+  if (
+    !isRecord(stopwatch) ||
+    !(stopwatch.status === 'running' || stopwatch.status === 'paused') ||
+    !isFiniteNumber(stopwatch.elapsedMs) ||
+    !(
+      (stopwatch.status === 'running' && isFiniteNumber(stopwatch.startedAt)) ||
+      (stopwatch.status === 'paused' && stopwatch.startedAt === null)
+    ) ||
+    !Array.isArray(stopwatch.laps)
+  ) {
+    return null;
+  }
+
+  const laps = stopwatch.laps.reduce<number[]>((validLaps, lap) => {
+    const previousLap = validLaps.at(-1) ?? 0;
+    if (isFiniteNumber(lap) && lap >= previousLap) validLaps.push(lap);
+    return validLaps;
+  }, []);
+
+  return {
+    status: stopwatch.status,
+    elapsedMs: Math.max(0, stopwatch.elapsedMs),
+    startedAt: stopwatch.startedAt,
+    laps,
   };
 }
 
