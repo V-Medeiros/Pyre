@@ -1,0 +1,65 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(0 0 0 / 72%);
+  backdrop-filter: blur(8px);
+}
+
+.dialog {
+  width: min(100%, 480px);
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 45%);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.header h2 { margin: 2px 0 0; }
+.eyebrow { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.titleIcon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; color: var(--primary); background: var(--surface-hover); }
+.titleIcon svg, .close svg, .actions svg { width: 20px; height: 20px; }
+.close { width: 40px; height: 40px; border: 0; border-radius: 8px; color: var(--muted); background: transparent; cursor: pointer; }
+.close:hover { color: var(--text); background: var(--surface-hover); }
+
+.tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border-radius: 10px; background: var(--surface-hover); }
+.tabs button { padding: 10px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; cursor: pointer; }
+.tabs .activeTab { color: var(--text); background: var(--background); }
+.form { display: grid; gap: 16px; }
+.form label { display: grid; gap: 7px; color: var(--muted); font-size: 0.86rem; }
+.form input:not([type='checkbox']) { height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: 9px; color: var(--text); background: var(--background); }
+.importChoice { grid-template-columns: auto 1fr; align-items: start; padding: 12px; border: 1px solid var(--border); border-radius: 10px; }
+.importChoice input { margin-top: 3px; }
+.importChoice span { display: grid; gap: 3px; }
+.importChoice strong { color: var(--text); }
+.importChoice small { line-height: 1.35; }
+.primary { height: 46px; border: 0; border-radius: 10px; color: white; background: var(--primary); font-weight: 700; cursor: pointer; }
+.primary:disabled, .actions button:disabled { opacity: 0.6; cursor: wait; }
+.error { margin: 0; color: #ff7a7a; font-size: 0.88rem; }
+
+.connected { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; }
+.connected > svg { color: var(--primary); }
+.connected div { display: grid; gap: 3px; }
+.connected small { color: var(--muted); }
+.connected > span { color: #62c987; font-size: 0.8rem; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.actions .error { grid-column: 1 / -1; }
+.actions button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; border: 1px solid var(--border); border-radius: 9px; color: var(--text); background: transparent; cursor: pointer; }
+.actions .danger { color: #ff7a7a; }
+
+@media (max-width: 520px) {
+  .dialog { padding: 20px; }
+  .actions { grid-template-columns: 1fr; }
+}

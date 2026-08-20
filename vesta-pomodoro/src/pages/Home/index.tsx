@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CountDown } from '../../components/CountDown';
+import { AccountPanel } from '../../components/AccountPanel';
 import { FocusFlame } from '../../components/FocusFlame';
 import { HistoryPanel } from '../../components/HistoryPanel';
 import { MainForm } from '../../components/MainForm';
@@ -11,15 +12,18 @@ import { useTaskContext } from '../../context/TaskContext/UseTaskContext';
 import type { AppMode } from '../../Models/AppMode';
 import { MainTemplate } from '../../templates/MainTemplate';
 import { playCompletionSound } from '../../utils/playCompletionSound';
+import { CLOUD_ENABLED } from '../../api/cloud';
 
 export function Home() {
   const { ContextState, dismissFeedback, toggleTask } = useTaskContext();
   const [activeMode, setActiveMode] = useState<AppMode>('pomodoro');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const playedSessionId = useRef<string | null>(null);
   const closeHistory = useCallback(() => setIsHistoryOpen(false), []);
   const closeSettings = useCallback(() => setIsSettingsOpen(false), []);
+  const closeAccount = useCallback(() => setIsAccountOpen(false), []);
   const selectedTask = ContextState.tasks.find(
     (task) => task.id === ContextState.selectedTaskId,
   );
@@ -53,6 +57,7 @@ export function Home() {
       onModeChange={setActiveMode}
       onOpenHistory={() => setIsHistoryOpen(true)}
       onOpenSettings={() => setIsSettingsOpen(true)}
+      onOpenAccount={CLOUD_ENABLED ? () => setIsAccountOpen(true) : undefined}
     >
       {activeMode === 'pomodoro' ? (
         <div className='home-layout'>
@@ -100,6 +105,7 @@ export function Home() {
       )}
       {isHistoryOpen && <HistoryPanel onClose={closeHistory} />}
       {isSettingsOpen && <SettingsPanel onClose={closeSettings} />}
+      {isAccountOpen && <AccountPanel onClose={closeAccount} />}
     </MainTemplate>
   );
 }

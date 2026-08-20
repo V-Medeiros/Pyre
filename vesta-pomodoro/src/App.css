@@ -310,3 +310,12 @@
     font-size: 0.8rem;
   }
 }
+.cloud-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: var(--background);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}

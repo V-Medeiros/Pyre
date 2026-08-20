@@ -13,6 +13,7 @@ type MainTemplateProps = {
   onModeChange?: (mode: AppMode) => void;
   onOpenHistory?: () => void;
   onOpenSettings?: () => void;
+  onOpenAccount?: () => void;
 };
 
 export function MainTemplate({
@@ -22,6 +23,7 @@ export function MainTemplate({
   onModeChange,
   onOpenHistory,
   onOpenSettings,
+  onOpenAccount,
 }: MainTemplateProps) {
   const modes: { id: AppMode; label: string }[] = [
     { id: 'pomodoro', label: 'Pomodoro' },
@@ -62,6 +64,7 @@ export function MainTemplate({
           <Menu
             onOpenHistory={onOpenHistory}
             onOpenSettings={onOpenSettings}
+            onOpenAccount={onOpenAccount}
           />
         </header>
 

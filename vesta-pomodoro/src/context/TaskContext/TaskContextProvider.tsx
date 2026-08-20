@@ -8,6 +8,7 @@ import {
 import type { SessionModel } from '../../Models/SessionModel';
 import type { SettingsModel, StreakModel } from '../../Models/TaskStateModel';
 import type { TaskModel } from '../../Models/TaskModel';
+import { getCloudDeviceId, queueCloudOperation } from '../../api/cloud';
 import { differenceInCalendarDays, toLocalDateKey } from '../../utils/date';
 import { formatSecondsToMinutes } from '../../utils/formatSecondsToMinutes';
 import { STORAGE_KEYS, writeStorage } from '../../utils/storage';
@@ -48,6 +49,14 @@ function updateStreak(streak: StreakModel, sessionDate: string): StreakModel {
 
 export function TaskContextProvider({ children }: TaskContextProviderProps) {
   const [ContextState, SetState] = useState(createInitialTaskState);
+
+  useEffect(() => {
+    function hydrate() {
+      SetState(createInitialTaskState());
+    }
+    window.addEventListener('vesta-cloud-hydrated', hydrate);
+    return () => window.removeEventListener('vesta-cloud-hydrated', hydrate);
+  }, []);
 
   const completeSession = useCallback(() => {
     SetState((state) => {
@@ -164,33 +173,40 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
   }, []);
 
   const startSession = useCallback(() => {
-    SetState((state) => {
-      if (state.sessionStatus === 'running' || state.sessionStatus === 'paused') {
-        return state;
-      }
-
-      const now = Date.now();
-      const durationInSeconds = state.durationMinutes * 60;
-
-      return {
-        ...state,
-        activeSession: {
-          id: createId('session'),
-          durationMinutes: state.durationMinutes,
-          taskId: state.selectedTaskId,
-          status: 'running',
-          startedAt: new Date(now).toISOString(),
-          endsAt: now + durationInSeconds * 1000,
-          pausedSecondsRemaining: null,
-        },
-        sessionStatus: 'running',
-        secondsRemaining: durationInSeconds,
-        feedbackMessage: null,
-      };
+    if (ContextState.sessionStatus === 'running' || ContextState.sessionStatus === 'paused') return;
+    const now = Date.now();
+    const id = createId('session');
+    const durationInSeconds = ContextState.durationMinutes * 60;
+    SetState((state) => ({
+      ...state,
+      activeSession: {
+        id,
+        durationMinutes: ContextState.durationMinutes,
+        taskId: ContextState.selectedTaskId,
+        status: 'running',
+        startedAt: new Date(now).toISOString(),
+        endsAt: now + durationInSeconds * 1000,
+        pausedSecondsRemaining: null,
+      },
+      sessionStatus: 'running',
+      secondsRemaining: durationInSeconds,
+      feedbackMessage: null,
+    }));
+    queueCloudOperation({
+      method: 'POST',
+      path: '/api/v1/focus-sessions',
+      body: {
+        id,
+        durationMinutes: ContextState.durationMinutes,
+        taskId: ContextState.selectedTaskId,
+        deviceId: getCloudDeviceId(),
+      },
     });
-  }, []);
+  }, [ContextState.durationMinutes, ContextState.selectedTaskId, ContextState.sessionStatus]);
 
   const pauseSession = useCallback(() => {
+    if (ContextState.sessionStatus !== 'running' || !ContextState.activeSession) return;
+    const sessionId = ContextState.activeSession.id;
     SetState((state) => {
       if (
         state.sessionStatus !== 'running' ||
@@ -216,9 +232,13 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
         secondsRemaining,
       };
     });
-  }, []);
+    queueCloudOperation({ method: 'POST', path: `/api/v1/focus-sessions/${sessionId}/pause`,
+      body: { deviceId: getCloudDeviceId() } });
+  }, [ContextState.activeSession, ContextState.sessionStatus]);
 
   const resumeSession = useCallback(() => {
+    if (ContextState.sessionStatus !== 'paused' || !ContextState.activeSession) return;
+    const sessionId = ContextState.activeSession.id;
     SetState((state) => {
       if (
         state.sessionStatus !== 'paused' ||
@@ -239,9 +259,13 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
         sessionStatus: 'running',
       };
     });
-  }, []);
+    queueCloudOperation({ method: 'POST', path: `/api/v1/focus-sessions/${sessionId}/resume`,
+      body: { deviceId: getCloudDeviceId() } });
+  }, [ContextState.activeSession, ContextState.sessionStatus]);
 
   const abandonSession = useCallback(() => {
+    if (!ContextState.activeSession) return;
+    const sessionId = ContextState.activeSession.id;
     SetState((state) => {
       if (!state.activeSession) return state;
 
@@ -265,7 +289,9 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
         feedbackMessage: ABANDONED_MESSAGE,
       };
     });
-  }, []);
+    queueCloudOperation({ method: 'POST', path: `/api/v1/focus-sessions/${sessionId}/abandon`,
+      body: { deviceId: getCloudDeviceId() } });
+  }, [ContextState.activeSession]);
 
   const dismissFeedback = useCallback(() => {
     SetState((state) => ({
@@ -303,6 +329,9 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
       selectedTaskId: task.id,
     }));
 
+    queueCloudOperation({ method: 'POST', path: '/api/v1/tasks',
+      body: { id: task.id, title: task.text } });
+
     return task.id;
   }, []);
 
@@ -321,6 +350,8 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
   }, []);
 
   const toggleTask = useCallback((taskId: string) => {
+    const task = ContextState.tasks.find((item) => item.id === taskId);
+    if (!task || ContextState.activeSession?.taskId === taskId) return;
     const updatedAt = new Date().toISOString();
     SetState((state) => {
       if (state.activeSession?.taskId === taskId) return state;
@@ -336,9 +367,12 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
         ),
       };
     });
-  }, []);
+    queueCloudOperation({ method: 'POST',
+      path: `/api/v1/tasks/${taskId}/${task.completed ? 'reopen' : 'complete'}`, body: {} });
+  }, [ContextState.activeSession?.taskId, ContextState.tasks]);
 
   const deleteTask = useCallback((taskId: string) => {
+    if (ContextState.activeSession?.taskId === taskId) return;
     SetState((state) => {
       if (state.activeSession?.taskId === taskId) return state;
 
@@ -349,7 +383,8 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
         tasks: state.tasks.filter((task) => task.id !== taskId),
       };
     });
-  }, []);
+    queueCloudOperation({ method: 'DELETE', path: `/api/v1/tasks/${taskId}` });
+  }, [ContextState.activeSession?.taskId]);
 
   const updateSettings = useCallback((settings: Partial<SettingsModel>) => {
     SetState((state) => {
@@ -368,6 +403,10 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
           : state.secondsRemaining,
       };
     });
+    queueCloudOperation({ method: 'PATCH', path: '/api/v1/preferences', body: {
+      defaultDurationMinutes: settings.defaultDuration,
+      soundEnabled: settings.soundEnabled,
+    } });
   }, []);
 
   const value = useMemo(
