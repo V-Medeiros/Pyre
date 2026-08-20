@@ -1,0 +1,13 @@
+vesta:
+  security:
+    cookie-secure: true
+    require-https: true
+server:
+  forward-headers-strategy: framework
+logging:
+  structured:
+    format:
+      console: logstash
+  level:
+    root: INFO
+    com.vesta.api: INFO

@@ -1,0 +1,11 @@
+vesta:
+  security:
+    jwt-secret: test-secret-that-is-long-enough-for-hmac-sha-256
+    cookie-secure: false
+spring:
+  datasource:
+    url: ${VESTA_TEST_DATABASE_URL:jdbc:postgresql://localhost:5432/vesta_test}
+    username: ${VESTA_TEST_DATABASE_USERNAME:vesta}
+    password: ${VESTA_TEST_DATABASE_PASSWORD:vesta}
+  mail:
+    test-connection: false
