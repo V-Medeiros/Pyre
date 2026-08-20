@@ -221,3 +221,10 @@ Os modos Pomodoro e Stopwatch estao funcionais no frontend React. Pomodoro
 inclui tarefas, streak, fogueira de 14 dias e configuracoes; Stopwatch inclui
 pausa, retomada, voltas e persistencia local. A aba Timer continua exibindo uma
 pagina minima de progresso enquanto seu modo dedicado e desenvolvido.
+
+O backend opcional esta em `vesta-api`: Spring Boot 3, PostgreSQL, Flyway,
+autenticacao com refresh token rotativo, tarefas, preferencias, sessoes,
+historico, streak derivado, importacao idempotente e sincronizacao incremental.
+O frontend continua funcionando sem conta e oferece conexao com a nuvem sem
+apagar os dados locais antes da confirmacao do servidor. Consulte
+`vesta-api/README.md` para executar a API.

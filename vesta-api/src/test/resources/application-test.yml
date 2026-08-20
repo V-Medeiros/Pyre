@@ -1,0 +1,30 @@
+vesta:
+  security:
+    jwt-secret: test-secret-that-is-long-enough-for-hmac-sha-256
+    issuer: vesta-api
+    access-token-ttl: PT15M
+    refresh-token-ttl: P30D
+    cookie-secure: false
+    require-https: false
+  cors:
+    allowed-origins: http://localhost:5173
+  mail:
+    from: no-reply@vesta.test
+    frontend-url: http://localhost:5173
+spring:
+  datasource:
+    url: jdbc:h2:mem:vesta;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  mail:
+    host: localhost
+    port: 1025
+management:
+  health:
+    mail:
+      enabled: false
