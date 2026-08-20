@@ -1,0 +1,312 @@
+openapi: 3.1.0
+info:
+  title: Vesta API
+  version: v1
+  description: Optional cloud continuity for the local-first Vesta client.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /api/v1/auth/register:
+    post:
+      security: []
+      tags: [Authentication]
+      operationId: register
+      requestBody: {$ref: '#/components/requestBodies/Register'}
+      responses:
+        '200': {$ref: '#/components/responses/Auth'}
+        '400': {$ref: '#/components/responses/Problem'}
+        '409': {$ref: '#/components/responses/Problem'}
+  /api/v1/auth/login:
+    post:
+      security: []
+      tags: [Authentication]
+      operationId: login
+      requestBody: {$ref: '#/components/requestBodies/Login'}
+      responses:
+        '200': {$ref: '#/components/responses/Auth'}
+        '400': {$ref: '#/components/responses/Problem'}
+  /api/v1/auth/refresh:
+    post:
+      security: []
+      tags: [Authentication]
+      operationId: refresh
+      parameters:
+        - {in: header, name: X-CSRF-Token, required: true, schema: {type: string}}
+      responses:
+        '200': {$ref: '#/components/responses/Auth'}
+        '400': {$ref: '#/components/responses/Problem'}
+  /api/v1/auth/logout:
+    post:
+      security: []
+      tags: [Authentication]
+      operationId: logout
+      responses: {'200': {description: Logged out}}
+  /api/v1/auth/logout-all:
+    post:
+      tags: [Authentication]
+      operationId: logoutAll
+      responses: {'200': {description: All refresh sessions revoked}}
+  /api/v1/auth/verify-email:
+    post:
+      security: []
+      tags: [Authentication]
+      operationId: verifyEmail
+      responses: {'200': {description: Email verified}}
+  /api/v1/auth/forgot-password:
+    post:
+      security: []
+      tags: [Authentication]
+      operationId: forgotPassword
+      responses: {'202': {description: Request accepted}}
+  /api/v1/auth/reset-password:
+    post:
+      security: []
+      tags: [Authentication]
+      operationId: resetPassword
+      responses: {'200': {description: Password reset and sessions revoked}}
+  /api/v1/me:
+    get:
+      tags: [Account]
+      operationId: getCurrentUser
+      responses: {'200': {description: Current account}}
+    patch:
+      tags: [Account]
+      operationId: updateCurrentUser
+      responses:
+        '200': {description: Updated account}
+        '409': {$ref: '#/components/responses/Problem'}
+    delete:
+      tags: [Account]
+      operationId: deleteCurrentUser
+      responses: {'204': {description: Account scheduled for deletion}}
+  /api/v1/me/export:
+    get:
+      tags: [Account]
+      operationId: exportAccount
+      responses: {'200': {description: Portable account JSON}}
+  /api/v1/tasks:
+    get:
+      tags: [Tasks]
+      operationId: listTasks
+      parameters:
+        - {in: query, name: status, schema: {type: string, enum: [OPEN, COMPLETED, ALL]}}
+        - {in: query, name: cursor, schema: {type: string}}
+        - {in: query, name: limit, schema: {type: integer, minimum: 1, maximum: 100}}
+      responses: {'200': {description: Cursor page of tasks}}
+    post:
+      tags: [Tasks]
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateTaskRequest'}
+      responses: {'201': {description: Task created}}
+  /api/v1/tasks/{id}:
+    parameters: [{$ref: '#/components/parameters/ResourceId'}]
+    get:
+      tags: [Tasks]
+      operationId: getTask
+      responses: {'200': {description: Task}, '404': {$ref: '#/components/responses/Problem'}}
+    patch:
+      tags: [Tasks]
+      operationId: renameTask
+      responses: {'200': {description: Renamed task}, '409': {$ref: '#/components/responses/Problem'}}
+    delete:
+      tags: [Tasks]
+      operationId: deleteTask
+      responses: {'204': {description: Soft-deleted task}}
+  /api/v1/tasks/{id}/complete:
+    post:
+      tags: [Tasks]
+      operationId: completeTask
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses: {'200': {description: Completed task}}
+  /api/v1/tasks/{id}/reopen:
+    post:
+      tags: [Tasks]
+      operationId: reopenTask
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses: {'200': {description: Reopened task}}
+  /api/v1/preferences:
+    get:
+      tags: [Preferences]
+      operationId: getPreferences
+      responses: {'200': {description: Preferences}}
+    patch:
+      tags: [Preferences]
+      operationId: updatePreferences
+      responses: {'200': {description: Updated preferences}}
+  /api/v1/focus-sessions:
+    get:
+      tags: [Focus sessions]
+      operationId: listFocusSessions
+      parameters:
+        - {in: query, name: cursor, schema: {type: string}}
+        - {in: query, name: limit, schema: {type: integer, minimum: 1, maximum: 100}}
+      responses: {'200': {description: Recent sessions}}
+    post:
+      tags: [Focus sessions]
+      operationId: startFocusSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/StartSessionRequest'}
+      responses:
+        '201': {description: Session started}
+        '409': {$ref: '#/components/responses/Problem'}
+  /api/v1/focus-sessions/active:
+    get:
+      tags: [Focus sessions]
+      operationId: getActiveFocusSession
+      responses:
+        '200': {description: Active or just-reconciled session}
+        '404': {$ref: '#/components/responses/Problem'}
+  /api/v1/focus-sessions/{id}:
+    get:
+      tags: [Focus sessions]
+      operationId: getFocusSession
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses: {'200': {description: Focus session}}
+  /api/v1/focus-sessions/{id}/pause:
+    post:
+      tags: [Focus sessions]
+      operationId: pauseFocusSession
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses: {'200': {description: Paused or current idempotent state}}
+  /api/v1/focus-sessions/{id}/resume:
+    post:
+      tags: [Focus sessions]
+      operationId: resumeFocusSession
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses: {'200': {description: Resumed or current idempotent state}}
+  /api/v1/focus-sessions/{id}/abandon:
+    post:
+      tags: [Focus sessions]
+      operationId: abandonFocusSession
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses: {'200': {description: Abandoned or current idempotent state}}
+  /api/v1/history:
+    get:
+      tags: [Progress]
+      operationId: getHistory
+      responses: {'200': {description: Day-by-day visual history}}
+  /api/v1/streak:
+    get:
+      tags: [Progress]
+      operationId: getStreak
+      responses: {'200': {description: Derived current and longest streak}}
+  /api/v1/stats/summary:
+    get:
+      tags: [Progress]
+      operationId: getStatsSummary
+      responses: {'200': {description: Daily and per-task totals}}
+  /api/v1/imports/local-storage:
+    post:
+      tags: [Migration]
+      operationId: importLocalStorage
+      parameters:
+        - {in: header, name: Idempotency-Key, required: true, schema: {type: string}}
+      responses: {'200': {description: Import report or prior idempotent result}}
+  /api/v1/imports/{id}:
+    get:
+      tags: [Migration]
+      operationId: getImport
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses: {'200': {description: Import report}}
+  /api/v1/sync/bootstrap:
+    get:
+      tags: [Sync]
+      operationId: bootstrapSync
+      responses: {'200': {description: Full snapshot and cursor}}
+  /api/v1/sync/changes:
+    get:
+      tags: [Sync]
+      operationId: incrementalSync
+      parameters:
+        - {in: query, name: cursor, required: true, schema: {type: string, format: date-time}}
+      responses: {'200': {description: Changes, tombstones, and next cursor}}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  parameters:
+    ResourceId:
+      in: path
+      name: id
+      required: true
+      schema: {type: string, pattern: '^[A-Za-z0-9_-]{1,100}$'}
+  requestBodies:
+    Register:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/RegisterRequest'}
+    Login:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/LoginRequest'}
+  responses:
+    Auth:
+      description: Access token; refresh and CSRF cookies are also set
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/AuthResponse'}
+    Problem:
+      description: RFC 9457 problem detail
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password, timezone]
+      properties:
+        email: {type: string, format: email, maxLength: 320}
+        password: {type: string, minLength: 10, maxLength: 72}
+        displayName: {type: string, maxLength: 80}
+        timezone: {type: string, example: America/Sao_Paulo}
+        locale: {type: string, example: pt-BR}
+        deviceName: {type: string, maxLength: 160}
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: {type: string, format: email}
+        password: {type: string}
+        deviceName: {type: string}
+    AuthResponse:
+      type: object
+      required: [accessToken, tokenType, expiresInSeconds, user]
+      properties:
+        accessToken: {type: string}
+        tokenType: {type: string, const: Bearer}
+        expiresInSeconds: {type: integer}
+        user: {type: object}
+    CreateTaskRequest:
+      type: object
+      required: [title]
+      properties:
+        id: {type: string, pattern: '^[A-Za-z0-9_-]{1,100}$'}
+        title: {type: string, minLength: 1, maxLength: 120}
+    StartSessionRequest:
+      type: object
+      required: [durationMinutes]
+      properties:
+        id: {type: string}
+        durationMinutes: {type: integer, minimum: 5, maximum: 120}
+        taskId: {type: [string, 'null']}
+        deviceId: {type: [string, 'null']}
+    Problem:
+      type: object
+      required: [type, title, status, detail, code]
+      properties:
+        type: {type: string, format: uri}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        instance: {type: string, format: uri}
+        code: {type: string}
